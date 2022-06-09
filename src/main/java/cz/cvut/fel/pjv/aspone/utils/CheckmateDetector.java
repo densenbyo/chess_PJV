@@ -7,6 +7,7 @@ import cz.cvut.fel.pjv.aspone.piece.King;
 import cz.cvut.fel.pjv.aspone.piece.Piece;
 import cz.cvut.fel.pjv.aspone.piece.Queen;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
@@ -18,22 +19,25 @@ import java.util.logging.Logger;
  * @project atazhmuk
  * @created 01 /04/2022 - 16:12 Checkmate detector class
  */
-public class CheckmateDetector {
+public class CheckmateDetector implements Serializable {
 
     /**
      * The constant LOGGER.
      */
     public static final Logger LOGGER = Logger.getLogger(CheckmateDetector.class.getName());
 
-    private final Board board;
-    private final LinkedList<Piece> wPieces;
-    private final LinkedList<Piece> bPieces;
-    private final LinkedList<Square> movableSquares;
-    private final LinkedList<Square> squares;
-    private final King bKing;
-    private final King wKing;
-    private final HashMap<Square, List<Piece>> wMoves;
-    private final HashMap<Square,List<Piece>> bMoves;
+    private Board board;
+    private LinkedList<Piece> wPieces;
+    private LinkedList<Piece> bPieces;
+    private LinkedList<Square> movableSquares;
+    private LinkedList<Square> squares;
+    private King bKing;
+    private King wKing;
+    private HashMap<Square, List<Piece>> wMoves;
+    private HashMap<Square, List<Piece>> bMoves;
+    List<Piece> pieces = new ArrayList<>();
+    Piece piece;
+    List<Square> mvs;
 
     /**
      * The constant whiteInCheck.
@@ -43,6 +47,14 @@ public class CheckmateDetector {
      * The constant blackInCheck.
      */
     public static boolean blackInCheck = false;
+
+    public CheckmateDetector() {
+        this.board = null;
+        this.wPieces = null;
+        this.bPieces = null;
+        this.bKing = null;
+        this.wKing = null;
+    }
 
     /**
      * Instantiates a new Checkmate detector.
@@ -86,38 +98,38 @@ public class CheckmateDetector {
         Iterator<Piece> bIter = bPieces.iterator();
 
         for (List<Piece> pieces : wMoves.values()) {
-            pieces.removeAll(pieces);
+            pieces.clear();
         }
         for (List<Piece> pieces : bMoves.values()) {
-            pieces.removeAll(pieces);
+            pieces.clear();
         }
-        movableSquares.removeAll(movableSquares);
+        movableSquares.clear();
 
         while (wIter.hasNext()) {
-            Piece piece = wIter.next();
+            piece = wIter.next();
 
             if (!piece.getClass().equals(King.class)) {
                 if (piece.getCurrentSquare() == null) {
                     wIter.remove();
                     continue;
                 }
-                List<Square> mvs = piece.getLegalMoves(board);
+                mvs = piece.getLegalMoves(board);
                 for (Square mv : mvs) {
-                    List<Piece> pieces = wMoves.get(mv);
+                    pieces = wMoves.get(mv);
                     pieces.add(piece);
                 }
             }
         }
 
         while (bIter.hasNext()) {
-            Piece piece = bIter.next();
+            piece = bIter.next();
 
             if (!piece.getClass().equals(King.class)) {
                 if (piece.getCurrentSquare() == null) {
                     wIter.remove();
                     continue;
                 }
-                List<Square> mvs = piece.getLegalMoves(board);
+                mvs = piece.getLegalMoves(board);
                 for (Square mv : mvs) {
                     List<Piece> pieces = bMoves.get(mv);
                     pieces.add(piece);
@@ -134,7 +146,6 @@ public class CheckmateDetector {
     public boolean blackInCheck() {
         update();
         Square sq = bKing.getCurrentSquare();
-
         if (wMoves.get(sq).isEmpty()) {
             movableSquares.addAll(squares);
             blackInCheck = false;
@@ -188,13 +199,21 @@ public class CheckmateDetector {
      * @return true if black in check mate
      */
     public boolean blackCheckMated() {
-        boolean checkmate = true;
-        if (!this.blackInCheck()) return false;
-        if (canEvade(wPieces, bKing)) checkmate = false;
+        //boolean checkmate = true;
+        if (!this.blackInCheck()) {
+            return false;
+        }
+        if (canEvade(wPieces, bKing)) {
+            return false;
+        }
         List<Piece> threats = wMoves.get(bKing.getCurrentSquare());
-        if (canCapture(bMoves, threats, bKing)) checkmate = false;
-        if (canBlock(threats, bMoves, bKing)) checkmate = false;
-        return checkmate;
+        if (canCapture(bMoves, threats, bKing)) {
+            return false;
+        }
+        if (canBlock(threats, bMoves, bKing)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -203,13 +222,20 @@ public class CheckmateDetector {
      * @return true if white in check mate
      */
     public boolean whiteCheckMated() {
-        boolean checkmate = true;
-        if (!this.whiteInCheck()) return false;
-        if (canEvade(bPieces, wKing)) checkmate = false;
+        if (!this.whiteInCheck()) {
+            return false;
+        }
+        if (canEvade(bPieces, wKing)) {
+            return false;
+        }
         List<Piece> threats = bMoves.get(wKing.getCurrentSquare());
-        if (canCapture(wMoves, threats, wKing)) checkmate = false;
-        if (canBlock(threats, wMoves, wKing)) checkmate = false;
-        return checkmate;
+        if (canCapture(wMoves, threats, wKing)) {
+            return false;
+        }
+        if (canBlock(threats, wMoves, wKing)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -425,11 +451,13 @@ public class CheckmateDetector {
      * @return list of allowed squares
      */
     public List<Square> getAllowableSquares() {
-        movableSquares.removeAll(movableSquares);
+        movableSquares.clear();
         if (whiteInCheck()) {
             whiteCheckMated();
         } else if (blackInCheck()) {
             blackCheckMated();
+        } else {
+            return movableSquares;
         }
         return movableSquares;
     }
@@ -443,29 +471,68 @@ public class CheckmateDetector {
      */
     public boolean testMove(Piece piece, Square square) {
         Piece c = square.getOccupyingPiece();
-        boolean moveTest = true;
-
         if (c != null){
             if (c.getPieceNumber() == 2){
+                System.out.println("test0");
+                return false;
+            }
+            if(piece.getColor() == 1 && c.getColor() == 1) {
+                System.out.println("SALAM");
+                return false;
+            } else if(piece.getColor() == 0 && c.getColor() == 0) {
+                System.out.println("POPOLAM");
                 return false;
             }
         }
 
-        if (piece.getColor() == 1 && blackInCheck()) return false;
-        else if (piece.getColor() == 0 && whiteInCheck()) return  false;
+        if (piece.getColor() == 1 && blackInCheck()) {
+            System.out.println("test1");
+            return false;
+        }
+        else if (piece.getColor() == 0 && whiteInCheck()) {
+            System.out.println("test2");
+            return false;
+        }
 
         Square init = piece.getCurrentSquare();
 
         piece.move(square, board);
         update();
 
-        if (piece.getColor() == 0 && blackInCheck()) moveTest = false;
-        else if (piece.getColor() == 1 && whiteInCheck()) moveTest =  false;
+        if (piece.getColor() == 0 && blackInCheck()) {
+            System.out.println("test3");
+            piece.move(init, board);
+            if (c != null) {
+                square.put(c);
+            }
+            update();
+            return false;
+        } else if (piece.getColor() == 1 && whiteInCheck()) {
+            System.out.println("test4");
+            piece.move(init, board);
+            if (c != null) {
+                square.put(c);
+            }
+            update();
+            return false;
+        } else {
+            System.out.println("TEST MOVE IS GOOD");
+            update();
+            movableSquares.addAll(squares);
+            return true;
+        }
+    }
 
-        piece.move(init, board);
-        if (c != null) square.put(c);
-        update();
-        movableSquares.addAll(squares);
-        return moveTest;
+    public boolean boolTestMove(Piece piece, Square square) {
+        Piece piece1 = square.getOccupyingPiece();
+        if(piece1 != null) {
+            if(piece1.toString().equals("K")){
+                return false;
+            }
+            if(piece1.getColor() == piece.getColor()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

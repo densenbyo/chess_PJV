@@ -4,6 +4,7 @@ import cz.cvut.fel.pjv.aspone.board.Board;
 import cz.cvut.fel.pjv.aspone.board.Square;
 import cz.cvut.fel.pjv.aspone.piece.Piece;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
  * @project atazhmuk
  * @created 01 /04/2022 - 16:14 Computer class
  */
-public class Computer {
+public class Computer implements Serializable{
 
     /**
      * The constant LOGGER.

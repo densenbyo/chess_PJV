@@ -5,6 +5,9 @@ import cz.cvut.fel.pjv.aspone.board.Square;
 
 import java.util.List;
 
+import static cz.cvut.fel.pjv.aspone.utils.CheckmateDetector.blackInCheck;
+import static cz.cvut.fel.pjv.aspone.utils.CheckmateDetector.whiteInCheck;
+
 /**
  * The type Bishop.
  *
@@ -13,6 +16,10 @@ import java.util.List;
  * @created 01 /04/2022 - 16:13 Bishop class
  */
 public class Bishop extends Piece{
+
+    public Bishop(int color, Square initSq) {
+        super(color, initSq);
+    }
 
     /**
      * Instantiates a new Bishop.

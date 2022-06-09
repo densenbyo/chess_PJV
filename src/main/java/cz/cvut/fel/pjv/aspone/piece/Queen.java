@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class Queen extends Piece{
 
+    public Queen(int color, Square initSq) {
+        super(color, initSq);
+    }
+
     /**
      * Instantiates a new Queen.
      *

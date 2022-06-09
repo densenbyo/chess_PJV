@@ -1,12 +1,18 @@
 package cz.cvut.fel.pjv.aspone.gui;
 
 import cz.cvut.fel.pjv.aspone.board.Board;
+import cz.cvut.fel.pjv.aspone.board.Square;
 import cz.cvut.fel.pjv.aspone.utils.Clock;
+import cz.cvut.fel.pjv.aspone.utils.Helper;
+import cz.cvut.fel.pjv.aspone.utils.Reader;
+import cz.cvut.fel.pjv.aspone.utils.Writer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -26,13 +32,90 @@ public class GameWin {
     /**
      * The Black clock.
      */
-    public Clock blackClock;
+    public  Clock blackClock;
     /**
      * The White clock.
      */
-    public Clock whiteClock;
-    private Timer timer;
+    public  Clock whiteClock;
+    private  Timer timer;
     private final Board board;
+     Writer writer = new Writer();
+     Reader reader = new Reader();
+     Image whiteImg;
+
+    public GameWin(List<Helper> toLoad, boolean asd) {
+        blackClock = new Clock(0, 0, 0);
+        whiteClock = new Clock(0, 0, 0);
+        gameWindow = new JFrame("Chess");
+
+        try {
+            whiteImg = ImageIO.read(new File("img/Logo.png"));
+            gameWindow.setIconImage(whiteImg);
+        } catch (Exception e) {
+            LOGGER.info("File Not Found");
+        }
+
+        gameWindow.setLocation(100, 100);
+        gameWindow.setLayout(new BorderLayout(20,20));
+
+        // Game Data window
+        JPanel gameData = gameDataPanel("Black", "White", 0, 0, 0);
+        gameData.setSize(gameData.getPreferredSize());
+        gameWindow.add(gameData, BorderLayout.NORTH);
+
+        this.board = new Board(this, toLoad, asd);
+
+        gameWindow.add(board, BorderLayout.CENTER);
+
+        gameWindow.add(buttons(), BorderLayout.SOUTH);
+
+        gameWindow.setMinimumSize(gameWindow.getPreferredSize());
+        gameWindow.setSize(gameWindow.getPreferredSize());
+        gameWindow.setResizable(false);
+
+
+        gameWindow.pack();
+        gameWindow.setVisible(true);
+        gameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+    }
+
+    public GameWin(List<Helper> toLoad) {
+        blackClock = new Clock(0, 0, 0);
+        whiteClock = new Clock(0, 0, 0);
+        gameWindow = new JFrame("Chess");
+
+        try {
+            whiteImg = ImageIO.read(new File("img/Logo.png"));
+            gameWindow.setIconImage(whiteImg);
+        } catch (Exception e) {
+            LOGGER.info("File Not Found");
+        }
+
+        gameWindow.setLocation(100, 100);
+        gameWindow.setLayout(new BorderLayout(20,20));
+
+        // Game Data window
+        JPanel gameData = gameDataPanel("Black", "White", 0, 0, 0);
+        gameData.setSize(gameData.getPreferredSize());
+        gameWindow.add(gameData, BorderLayout.NORTH);
+
+        this.board = new Board(this, toLoad);
+
+        gameWindow.add(board, BorderLayout.CENTER);
+
+        gameWindow.add(buttons(), BorderLayout.SOUTH);
+
+        gameWindow.setMinimumSize(gameWindow.getPreferredSize());
+        gameWindow.setSize(gameWindow.getPreferredSize());
+        gameWindow.setResizable(false);
+
+
+        gameWindow.pack();
+        gameWindow.setVisible(true);
+        gameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+    }
 
     /**
      * Instantiates a new Game win.
@@ -78,6 +161,7 @@ public class GameWin {
         gameWindow.pack();
         gameWindow.setVisible(true);
         gameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        reader = new Reader();
     }
 
     private JPanel gameDataPanel(final String bn, final String wn,
@@ -184,6 +268,16 @@ public class GameWin {
             }
         });
 
+        final JButton saveGame = new JButton("Save");
+
+        saveGame.addActionListener(e -> {
+            try {
+                writer.writeFile(this.board.getAllPieces(this.board.getBoard()));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
         final JButton nGame = new JButton("New game");
 
         nGame.addActionListener(e -> {
@@ -198,7 +292,26 @@ public class GameWin {
             }
         });
 
+        /*final JButton loadGame = new JButton("Load");
+
+        loadGame.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int response = fileChooser.showOpenDialog(null);
+            fileChooser.setCurrentDirectory(new File("."));
+
+            if(response == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                try {
+                    System.out.println(reader.readFile(file).getClass().getName());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });*/
+
         buttons.add(nGame);
+        buttons.add(saveGame);
+        //buttons.add(loadGame);
         buttons.add(quit);
         buttons.setPreferredSize(buttons.getMinimumSize());
         return buttons;

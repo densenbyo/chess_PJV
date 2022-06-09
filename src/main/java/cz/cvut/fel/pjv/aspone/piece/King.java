@@ -18,6 +18,10 @@ import static cz.cvut.fel.pjv.aspone.utils.CheckmateDetector.whiteInCheck;
  */
 public class King extends Piece{
 
+    public King(int color, Square initSq) {
+        super(color, initSq);
+    }
+
     /**
      * Instantiates a new King.
      *

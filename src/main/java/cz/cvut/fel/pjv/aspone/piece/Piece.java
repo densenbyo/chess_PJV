@@ -2,6 +2,7 @@ package cz.cvut.fel.pjv.aspone.piece;
 
 import cz.cvut.fel.pjv.aspone.board.Board;
 import cz.cvut.fel.pjv.aspone.board.Square;
+import cz.cvut.fel.pjv.aspone.utils.CheckmateDetector;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -22,19 +24,22 @@ import java.util.logging.Logger;
  * @project atazhmuk
  * @created 01 /04/2022 - 16:05 Piece class
  */
-public abstract class Piece {
+public abstract class Piece implements Serializable {
     /**
      * The constant LOGGER.
      */
     public static final Logger LOGGER = Logger.getLogger(Piece.class.getName());
+    public CheckmateDetector checkmateDetector = new CheckmateDetector();
 
     @Getter
     private final int color;
-    @Getter @Setter
+    @Getter
+    @Setter
     private Square currentSquare;
     @Getter
-    private BufferedImage img;
-    @Getter @Setter
+    transient Image img;
+    @Getter
+    @Setter
     private boolean wasMoved = false;
     @Getter
     private int pieceNumber;
@@ -51,6 +56,11 @@ public abstract class Piece {
     public static Square enPassantPawnPosition;
     private static int width = 150;
     private static int heigth = 150;
+
+    public Piece(int color, Square initSq){
+        this.color = color;
+        this.currentSquare = initSq;
+    }
 
     /**
      * Instantiates a new Piece.
@@ -114,8 +124,12 @@ public abstract class Piece {
 
         //if piece is same color - return false and dont execute move
         if (occup != null) {
-            if (occup.getColor() == this.color) return false;
-            else destination.capture(this);
+            if (occup.getColor() == this.color) {
+                return false;
+            }
+            else {
+                destination.capture(this);
+            }
         }
 
         // executing en passant move
@@ -167,6 +181,7 @@ public abstract class Piece {
             currentSquare.removePiece();
             currentSquare.put(new Queen(1, currentSquare, "img/WQ.png"));
             wasMoved = true;
+            System.out.println("QWEQWEQWE");
             return true;
         }
 
@@ -194,6 +209,24 @@ public abstract class Piece {
             Piece rook = new Rook(1,board[7][3],"img/WR.png");
             board[7][3].put(rook);
             rook.setWasMoved(true);
+        }
+        return true;
+    }
+
+    /**
+     * Method for testing
+     * @param destination where is going
+     * @param board1 current board
+     * @return boolean
+     */
+    public boolean testMove(Square destination, Board board1) {
+        Piece occup = destination.getOccupyingPiece();
+        Square[][] board = board1.getBoard();
+
+        //if piece is same color - return false and dont execute move
+        if (occup != null) {
+            if (occup.getColor() == this.color) return false;
+            else return true;
         }
         return true;
     }

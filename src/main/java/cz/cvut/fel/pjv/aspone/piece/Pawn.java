@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class Pawn extends Piece{
 
+    public Pawn(int color, Square initSq) {
+        super(color, initSq);
+    }
+
     /**
      * Instantiates a new Pawn.
      *

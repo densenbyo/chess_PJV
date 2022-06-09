@@ -3,8 +3,7 @@ package cz.cvut.fel.pjv.aspone.utils;
 import cz.cvut.fel.pjv.aspone.board.Square;
 import cz.cvut.fel.pjv.aspone.piece.Piece;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 import static cz.cvut.fel.pjv.aspone.board.Board.blackName;
 import static cz.cvut.fel.pjv.aspone.board.Board.whiteName;
@@ -20,6 +19,7 @@ public class Writer {
 
     private int whiteKingMovesCount = 0;
     private int blackKingMovesCount = 0;
+    String name;
 
     /**
      * writs new game statement with names of players
@@ -141,5 +141,20 @@ public class Writer {
             case 6 -> 2;
             default -> 1;
         };
+    }
+
+    public void writeFile(Object obj) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Enter file name!");
+        name = br.readLine();
+        try (FileOutputStream fos = new FileOutputStream(name + ".doc");
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            // write object to file
+            oos.writeObject(obj);
+            System.out.println("Game is saved!");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

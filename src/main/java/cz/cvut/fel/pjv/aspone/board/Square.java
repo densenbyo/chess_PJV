@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serializable;
 
 /**
  * The type Square.
@@ -14,20 +15,26 @@ import java.awt.*;
  * @project atazhmuk
  * @created 01 /04/2022 - 16:07 Square/Cell class
  */
-public class Square extends JComponent {
+public class Square extends JComponent implements Serializable {
     @Getter
     private Piece occupyingPiece;
     @Setter
     private boolean disPiece;
 
     @Getter
-    private final Board board;
+    private Board board;
     @Getter
     private final int color;
     @Getter
     private final int xNum;
     @Getter
     private final int yNum;
+
+    public Square(int color, int x, int y, boolean bool){
+        this.color = color;
+        this.xNum = x;
+        this.yNum = y;
+    }
 
     /**
      * Instantiates a new Square.

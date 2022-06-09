@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class Knight extends Piece{
 
+    public Knight(int color, Square initSq) {
+        super(color, initSq);
+    }
+
     /**
      * Instantiates a new Knight.
      *

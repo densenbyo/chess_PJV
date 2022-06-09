@@ -1,5 +1,7 @@
 package cz.cvut.fel.pjv.aspone.utils;
 
+import java.io.Serializable;
+
 /**
  * The type Clock.
  *

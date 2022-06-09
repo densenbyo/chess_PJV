@@ -1,5 +1,7 @@
 package cz.cvut.fel.pjv.aspone.utils;
 
+import java.io.Serializable;
+
 /**
  * The type Timer.
  *
@@ -16,6 +18,7 @@ public class Timer extends Thread{
      * The Exit.
      */
     boolean exit = false;
+    boolean interrupted;
 
     public void run(){
         while(!exit){
@@ -24,6 +27,10 @@ public class Timer extends Thread{
                 sleep(0,1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                interrupted = true;
+            }
+            if(interrupted) {
+                Thread.currentThread().interrupt();
             }
         }
     }
